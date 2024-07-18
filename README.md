@@ -1,7 +1,6 @@
 Основні вимоги
 
 Model:
-
     User (Поля: name, email, password)
     Task (Поля: title, description, status (наприклад, pending, in progress, completed), user_id, team_id)
     Comment (Поля: id, content, task_id, user_id)
