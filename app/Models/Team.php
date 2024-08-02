@@ -11,6 +11,9 @@ class Team extends Model
 {
     use HasFactory;
 
+    /**
+     * @var array<int, string>
+     */
     protected $fillable = [
         'name',
     ];

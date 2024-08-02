@@ -5,6 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property string $content
+ *
+ * @property int $task_id
+ * @property int $user_id
+ */
 class Comment extends Model
 {
     use HasFactory;
@@ -12,7 +18,7 @@ class Comment extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $fillable = [
         'content',

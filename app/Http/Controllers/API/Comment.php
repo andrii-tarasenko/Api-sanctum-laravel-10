@@ -3,17 +3,20 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\API\BaseController as BaseController;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Comment as CommentModel;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 class Comment extends BaseController
 {
     /**
      * Display a listing of the resource.
+     *
+     * @return JsonResponse
      */
-    public function index(Request $request, int $task_id)
+    public function index(): \Illuminate\Http\JsonResponse
     {
         $comments = CommentModel::all();
 
@@ -26,15 +29,21 @@ class Comment extends BaseController
 
     /**
      * Store a newly created resource in storage.
+     *
+     * @param Request $request
+     *
+     * @param int $task_id
+     *
+     * @return JsonResponse
      */
-    public function store(Request $request, int $task_id)
+    public function store(Request $request, int $task_id): \Illuminate\Http\JsonResponse
     {
-        $validated = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(),[
             'content' => 'required|string|max:255',
         ]);
 
-        if($validated->fails()){
-            return response(['errors'=>$validated->errors()],422);
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors());
         }
 
         $comment = new CommentModel();
@@ -42,23 +51,25 @@ class Comment extends BaseController
         $comment->task_id = $task_id;
         $comment->user_id = Auth::id();
 
-        if($comment->save()){
+        if ($comment->save()) {
             return $this->sendResponse($comment, 'Comment added successfully.');
         }
+
+        return $this->sendError('Comment not saved.');
     }
 
     /**
      * Remove the specified resource from storage.
+     *
+     * @param int $id
+     * @return JsonResponse
      */
-    public function destroy(int $id)
+    public function destroy(int $id): \Illuminate\Http\JsonResponse
     {
-        $comment = CommentModel::find($id);
-        if (empty($comment)) {
-            return $this->sendError('Comment not found');
+        if (CommentModel::destroy($id)) {
+            return $this->sendResponse([], 'Comment deleted successfully.');
         }
 
-        if($comment->delete()){
-            return $this->sendResponse($comment, 'Comment deleted successfully.');
-        }
+        return $this->sendError('Comment not found');
     }
 }

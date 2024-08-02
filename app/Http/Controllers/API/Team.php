@@ -7,18 +7,16 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\Team as ModelsTeam;
 use Illuminate\Support\Facades\Auth;
-use Validator;
-use App\Models\User;
+use Illuminate\Support\Facades\Validator;
 
 class Team extends BaseController
 {
-
     /**
      * Send all teams
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $teams = ModelsTeam::all();
 
@@ -29,15 +27,14 @@ class Team extends BaseController
         return $this->sendResponse($teams, 'All teams was send');
     }
 
-
     /**
      * add new Team
      *
      * @param Request $request
      *
-     * @return JsonResponse|void
+     * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
@@ -53,6 +50,8 @@ class Team extends BaseController
         if ($team->save()) {
             return $this->sendResponse($team, 'Team was created');
         }
+
+        return $this->sendError($team, 'Team was not created');
     }
 
     /**
@@ -62,9 +61,9 @@ class Team extends BaseController
      *
      * @return JsonResponse|object
      */
-    private function getUserTeam(int $id)
+    private function getUserTeam(int $id): object
     {
-        $team = ModelsTeam::find($id);
+        $team = ModelsTeam::all()->find($id);
 
         if (empty($team)) {
             return $this->sendError($team, 'Team not found');
@@ -80,12 +79,15 @@ class Team extends BaseController
      *
      * @return JsonResponse
      */
-    public function addUserToTeam(int $teamId)
+    public function addUserToTeam(int $teamId): JsonResponse
     {
         $updateUserTeam = $this->getUserTeam($teamId);
-        $updateUserTeam->users()->attach(Auth::id());
 
-        return $this->sendResponse($updateUserTeam, 'User added to team');
+        if ($updateUserTeam->users()->attach(Auth::id())) {
+            return $this->sendResponse($updateUserTeam, 'User added to team');
+        }
+
+        return $this->sendError($updateUserTeam, 'User not added to team');
     }
 
     /**
@@ -96,11 +98,14 @@ class Team extends BaseController
      *
      * @return JsonResponse
      */
-    public function removeUserFromTeam(int $teamId, int $userId)
+    public function removeUserFromTeam(int $teamId, int $userId): JsonResponse
     {
         $updateUserTeam = $this->getUserTeam($teamId);
-        $updateUserTeam->users()->detach($userId);
 
-        return $this->sendResponse($updateUserTeam, 'User deleted from the team');
+        if ($updateUserTeam->users()->detach($userId)) {
+            return $this->sendResponse($updateUserTeam, 'User removed from team');
+        }
+
+        return $this->sendError($updateUserTeam, 'User not removed from team');
     }
 }

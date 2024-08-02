@@ -3,17 +3,20 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\API\BaseController as BaseController;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use App\Models\Task as TaskModel;
 
 class Task extends BaseController
 {
     /**
      * Display a listing of the resource.
+     *
+     * @return JsonResponse
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $task = TaskModel::all();
 
@@ -22,8 +25,12 @@ class Task extends BaseController
 
     /**
      * Store a newly created resource in storage.
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required',
@@ -33,25 +40,31 @@ class Task extends BaseController
             return $this->sendError('Validation Error.', $validator->errors());
         }
         $input = $request->all();
-        $input['user_id'] = Auth::id();
 
         $task = new TaskModel();
         $task->title = $input['title'];
         $task->description = $input['description'];
         $task->user_id = Auth::id();
-        $task->save();
 
-        return $this->sendResponse($task, 'New task was created');
+        if ($task->save()) {
+            return $this->sendResponse($task, 'New task was created');
+        }
+
+        return $this->sendError('Task was not created');
     }
 
     /**
      * Display the specified resource.
+     *
+     * @param int $id
+     *
+     * @return JsonResponse
      */
-    public function show(int $id)
+    public function show(int $id): JsonResponse
     {
-        $task = TaskModel::findOrFail($id);
+        $task = TaskModel::all()->find($id);
 
-        if (is_null($task)) {
+        if ($task->isEmpty()) {
             return $this->sendError('Task was not found');
         }
 
@@ -60,8 +73,14 @@ class Task extends BaseController
 
     /**
      * Update the specified resource in storage.
+     *
+     * @param Request $request
+     *
+     * @param int $id
+     *
+     * @return JsonResponse
      */
-    public function update(Request $request, int $id)
+    public function update(Request $request, int $id): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required',
@@ -75,7 +94,7 @@ class Task extends BaseController
 
         $input = $request->all();
         $input['user_id'] = Auth::id();
-        $task =TaskModel::find($id);
+        $task = TaskModel::all()->find($id);
         $task->update($input);
 
         return $this->sendResponse($task, 'Task was updated');
@@ -83,16 +102,17 @@ class Task extends BaseController
 
     /**
      * Remove the specified resource from storage.
+     *
+     * @param int $id
+     *
+     * @return JsonResponse
      */
-    public function destroy(int $id)
+    public function destroy(int $id): \Illuminate\Http\JsonResponse
     {
-        $task = TaskModel::find($id);
-
-        if (is_null($task)) {
-            return $this->sendError('Task was not found');
+        if (TaskModel::destroy($id)) {
+            return $this->sendResponse($id, 'Task was deleted');
         }
-        $task->delete();
 
-        return $this->sendResponse($id, 'Task was deleted');
+        return $this->sendError('Task was not found');
     }
 }

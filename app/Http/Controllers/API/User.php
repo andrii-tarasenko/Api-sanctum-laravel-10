@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\API\BaseController;
+use App\Http\Controllers\API\BaseController as BaseController;
 use App\Models\User as UserModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class User extends BaseController
@@ -19,7 +19,7 @@ class User extends BaseController
      *
      * @return JsonResponse
      */
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
@@ -33,7 +33,9 @@ class User extends BaseController
 
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
-        $user = UserModel::create($input);
+        $user = new UserModel();
+        $user->fill($input);
+        $user->save();
         $success['token'] =  $user->createToken('MyApp')->accessToken;
         $success['name'] =  $user->name;
 
@@ -47,10 +49,16 @@ class User extends BaseController
      *
      * @return JsonResponse
      */
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
-        if (Auth::attempt(['email' => request('email'), 'password' => request('password')])) {
-            $user = Auth::user();
+        $loginData = $request->validate([
+            'email' => 'email|required',
+            'password' => 'required'
+        ]);
+
+        if (Auth::attempt($loginData)) {
+            $userAuth = Auth::user();
+            $user = UserModel::all()->find($userAuth->getAuthIdentifier());
             $token = explode('|', $user->createToken('MyApp')->plainTextToken);
             $success['token'] =  $token[1];
             $success['token_type'] =  'Bearer token';
@@ -64,9 +72,10 @@ class User extends BaseController
 
     /**
      * @param Request $request
-     * @return JsonResponse|void
+     *
+     * @return JsonResponse
      */
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
         $accessToken = $request->bearerToken();
         $token = PersonalAccessToken::findToken($accessToken);
@@ -74,5 +83,7 @@ class User extends BaseController
         if ($token->delete()) {
             return $this->sendResponse([], 'Successfully logged out.');
         }
+
+        return $this->sendError('User is authorisation.', ['error' => 'Somthing went wrong.']);
     }
 }
