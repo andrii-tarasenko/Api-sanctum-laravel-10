@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property string $content
@@ -29,7 +30,7 @@ class Comment extends Model
     /**
      * Get the user that owns the comment.
      */
-    public function users()
+    public function users(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -37,7 +38,7 @@ class Comment extends Model
     /**
      * Get the task that owns the comment.
      */
-    public function tasks()
+    public function tasks(): BelongsTo
     {
         return $this->belongsTo(Task::class);
     }

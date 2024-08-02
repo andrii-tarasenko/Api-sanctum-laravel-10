@@ -16,7 +16,7 @@ class Comment extends BaseController
      *
      * @return JsonResponse
      */
-    public function index(): \Illuminate\Http\JsonResponse
+    public function index(): JsonResponse
     {
         $comments = CommentModel::all();
 
@@ -36,7 +36,7 @@ class Comment extends BaseController
      *
      * @return JsonResponse
      */
-    public function store(Request $request, int $task_id): \Illuminate\Http\JsonResponse
+    public function store(Request $request, int $task_id): JsonResponse
     {
         $validator = Validator::make($request->all(),[
             'content' => 'required|string|max:255',
@@ -64,7 +64,7 @@ class Comment extends BaseController
      * @param int $id
      * @return JsonResponse
      */
-    public function destroy(int $id): \Illuminate\Http\JsonResponse
+    public function destroy(int $id): JsonResponse
     {
         if (CommentModel::destroy($id)) {
             return $this->sendResponse([], 'Comment deleted successfully.');

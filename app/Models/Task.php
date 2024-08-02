@@ -30,17 +30,17 @@ class Task extends Model
     /**
      * @return BelongsTo
      */
-    public function users()
+    public function users(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function teams()
+    public function teams(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    public function comments()
+    public function comments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Comment::class);
     }

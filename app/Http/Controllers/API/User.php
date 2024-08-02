@@ -12,6 +12,9 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class User extends BaseController
 {
+    final public const TOKEN_FIRST_ELEMENT_IN_ARRAY = 1;
+    final public const TYPE_OF_TOKEN = 'Bearer token';
+
     /**
      * Registration new user
      *
@@ -60,8 +63,8 @@ class User extends BaseController
             $userAuth = Auth::user();
             $user = UserModel::all()->find($userAuth->getAuthIdentifier());
             $token = explode('|', $user->createToken('MyApp')->plainTextToken);
-            $success['token'] =  $token[1];
-            $success['token_type'] =  'Bearer token';
+            $success['token'] =  $token[self::TOKEN_FIRST_ELEMENT_IN_ARRAY];
+            $success['token_type'] =  self::TYPE_OF_TOKEN;
             $success['name'] = $user->name;
 
             return $this->sendResponse($success, 'User login successfully.');

@@ -107,7 +107,7 @@ class Task extends BaseController
      *
      * @return JsonResponse
      */
-    public function destroy(int $id): \Illuminate\Http\JsonResponse
+    public function destroy(int $id): JsonResponse
     {
         if (TaskModel::destroy($id)) {
             return $this->sendResponse($id, 'Task was deleted');
