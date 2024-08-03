@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $description
  * @property int $user_id
  */
-
 class Task extends Model
 {
     use HasFactory;

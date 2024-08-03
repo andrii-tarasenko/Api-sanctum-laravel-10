@@ -3,9 +3,9 @@
 use App\Http\Controllers\API\Comment;
 use App\Http\Controllers\API\Task;
 use App\Http\Controllers\API\Team;
+use App\Http\Controllers\API\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,7 +28,7 @@ Route::controller(User::class)->group(function () {
     Route::post('login', 'login');
 });
 
-Route::group(['middleware' => 'auth:sanctum'], function() {
+Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logout', [User::class, 'logout']);
     Route::controller(Task::class)->group(function () {
         Route::get('tasks', 'index');

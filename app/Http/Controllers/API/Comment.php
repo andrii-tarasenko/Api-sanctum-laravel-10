@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\API\BaseController as BaseController;
+use App\Models\Comment as CommentModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Comment as CommentModel;
 use Illuminate\Support\Facades\Validator;
 
 class Comment extends BaseController
@@ -38,7 +38,7 @@ class Comment extends BaseController
      */
     public function store(Request $request, int $task_id): JsonResponse
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'content' => 'required|string|max:255',
         ]);
 

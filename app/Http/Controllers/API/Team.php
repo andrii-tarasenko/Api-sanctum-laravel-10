@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\API\BaseController as BaseController;
+use App\Models\Team as ModelsTeam;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Models\Team as ModelsTeam;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class Team extends BaseController
 {
     /**
-     * Send all teams
+     * Send all teams.
      *
      * @return JsonResponse
      */
@@ -28,7 +28,7 @@ class Team extends BaseController
     }
 
     /**
-     * add new Team
+     * add new Team.
      *
      * @param Request $request
      *
@@ -41,7 +41,7 @@ class Team extends BaseController
         ]);
 
         if ($validator->fails()) {
-            return $this->sendError($validator->errors(),  'Name is required');
+            return $this->sendError($validator->errors(), 'Name is required');
         }
 
         $team = new ModelsTeam();
@@ -55,7 +55,7 @@ class Team extends BaseController
     }
 
     /**
-     * get Team object
+     * get Team object.
      *
      * @param int $id
      *
@@ -73,7 +73,7 @@ class Team extends BaseController
     }
 
     /**
-     * Add user to team
+     * Add user to team.
      *
      * @param int $teamId
      *
@@ -82,16 +82,13 @@ class Team extends BaseController
     public function addUserToTeam(int $teamId): JsonResponse
     {
         $updateUserTeam = $this->getUserTeam($teamId);
+        $updateUserTeam->users()->attach(Auth::id());
 
-        if ($updateUserTeam->users()->attach(Auth::id())) {
-            return $this->sendResponse($updateUserTeam, 'User added to team');
-        }
-
-        return $this->sendError($updateUserTeam, 'User not added to team');
+        return $this->sendResponse($updateUserTeam, 'User added to team');
     }
 
     /**
-     * Remove user from team
+     * Remove user from team.
      *
      * @param int $teamId
      * @param int $userId
