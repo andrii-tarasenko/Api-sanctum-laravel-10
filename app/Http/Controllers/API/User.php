@@ -13,10 +13,11 @@ use Laravel\Sanctum\PersonalAccessToken;
 class User extends BaseController
 {
     final public const TOKEN_FIRST_ELEMENT_IN_ARRAY = 1;
+
     final public const TYPE_OF_TOKEN = 'Bearer token';
 
     /**
-     * Registration new user
+     * Registration new user.
      *
      * @param Request $request
      *
@@ -39,14 +40,14 @@ class User extends BaseController
         $user = new UserModel();
         $user->fill($input);
         $user->save();
-        $success['token'] =  $user->createToken('MyApp')->accessToken;
-        $success['name'] =  $user->name;
+        $success['token'] = $user->createToken('MyApp')->accessToken;
+        $success['name'] = $user->name;
 
         return $this->sendResponse($success, 'User register successfully.');
     }
 
     /**
-     * Authorisation user in the system
+     * Authorisation user in the system.
      *
      * @param Request $request
      *
@@ -56,15 +57,15 @@ class User extends BaseController
     {
         $loginData = $request->validate([
             'email' => 'email|required',
-            'password' => 'required'
+            'password' => 'required',
         ]);
 
         if (Auth::attempt($loginData)) {
             $userAuth = Auth::user();
             $user = UserModel::all()->find($userAuth->getAuthIdentifier());
             $token = explode('|', $user->createToken('MyApp')->plainTextToken);
-            $success['token'] =  $token[self::TOKEN_FIRST_ELEMENT_IN_ARRAY];
-            $success['token_type'] =  self::TYPE_OF_TOKEN;
+            $success['token'] = $token[self::TOKEN_FIRST_ELEMENT_IN_ARRAY];
+            $success['token_type'] = self::TYPE_OF_TOKEN;
             $success['name'] = $user->name;
 
             return $this->sendResponse($success, 'User login successfully.');
