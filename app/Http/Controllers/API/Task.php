@@ -3,14 +3,20 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\API\BaseController as BaseController;
-use App\Models\Task as TaskModel;
+use Domain\Task\Services\TaskService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class Task extends BaseController
 {
+    private $taskService;
+
+    public function __construct(TaskService $taskService)
+    {
+        $this->taskService = $taskService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -18,9 +24,13 @@ class Task extends BaseController
      */
     public function index(): JsonResponse
     {
-        $task = TaskModel::all();
+        $allTasks = $this->taskService->getAllTasks();
 
-        return $this->sendResponse($task, 'All tasks was send');
+        if ($allTasks === null) {
+            return $this->sendError(422, 'Comment is not found');
+        }
+
+        return $this->sendResponse($allTasks, 'All tasks was send');
     }
 
     /**
@@ -33,24 +43,25 @@ class Task extends BaseController
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
         ]);
 
         if ($validator->fails()) {
-            return $this->sendError('Validation Error.', $validator->errors());
-        }
-        $input = $request->all();
-
-        $task = new TaskModel();
-        $task->title = $input['title'];
-        $task->description = $input['description'];
-        $task->user_id = Auth::id();
-
-        if ($task->save()) {
-            return $this->sendResponse($task, 'New task was created');
+            return $this->sendError(422, $validator->errors());
         }
 
-        return $this->sendError('Task was not created');
+        $input = [
+            'title' => $request['title'],
+            'description' => $request['description'],
+        ];
+        $newTask = $this->taskService->createTask($input);
+
+        if ($newTask === null) {
+            return $this->sendError(422, 'Task was not created');
+        }
+
+        return $this->sendResponse($newTask, 'Task was created');
     }
 
     /**
@@ -62,13 +73,13 @@ class Task extends BaseController
      */
     public function show(int $id): JsonResponse
     {
-        $task = TaskModel::all()->find($id);
+        $task = $this->taskService->getTaskById($id);
 
-        if ($task->isEmpty()) {
-            return $this->sendError('Task was not found');
+        if ($task === null) {
+            return $this->sendError(422, 'Task was not found');
         }
 
-        return $this->sendResponse($task, 'title - ' . $task['title'] . ' was send');
+        return $this->sendResponse($task, 'Task was retrieved');
     }
 
     /**
@@ -83,21 +94,20 @@ class Task extends BaseController
     public function update(Request $request, int $id): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required',
-            'description' => 'required',
+            'title' => 'string|max:255',
+            'description' => 'string',
             'status' => 'required',
         ]);
 
         if ($validator->fails()) {
-            return $this->sendError('Validation Error.', $validator->errors());
+            return $this->sendError(422, $validator->errors());
         }
 
-        $input = $request->all();
-        $input['user_id'] = Auth::id();
-        $task = TaskModel::all()->find($id);
-        $task->update($input);
+        if ($this->taskService->updateTaskById($request->all(), $id)) {
+            return $this->sendResponse(null, 'Task was updated');
+        }
 
-        return $this->sendResponse($task, 'Task was updated');
+        return $this->sendError(422, 'Task was not updated');
     }
 
     /**
@@ -109,10 +119,10 @@ class Task extends BaseController
      */
     public function destroy(int $id): JsonResponse
     {
-        if (TaskModel::destroy($id)) {
-            return $this->sendResponse($id, 'Task was deleted');
+        if ($this->taskService->deleteTaskById($id)) {
+            return $this->sendResponse(null, 'Task was deleted');
         }
 
-        return $this->sendError('Task was not found');
+        return $this->sendError(422, 'Task was not deleted');
     }
 }

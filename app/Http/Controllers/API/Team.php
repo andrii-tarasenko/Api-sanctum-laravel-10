@@ -3,14 +3,20 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\API\BaseController as BaseController;
-use App\Models\Team as ModelsTeam;
+use Domain\Team\Services\TeamService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class Team extends BaseController
 {
+    private TeamService $teamService;
+
+    public function __construct(TeamService $teamService)
+    {
+        $this->teamService = $teamService;
+    }
+
     /**
      * Send all teams.
      *
@@ -18,13 +24,13 @@ class Team extends BaseController
      */
     public function index(): JsonResponse
     {
-        $teams = ModelsTeam::all();
+        $team = $this->teamService->getAllTeams();
 
-        if ($teams->isEmpty()) {
-            return $this->sendError($teams, 'Teams not found');
+        if ($team === null) {
+            return $this->sendError(422, 'Teams not found');
         }
 
-        return $this->sendResponse($teams, 'All teams was send');
+        return $this->sendResponse($team, 'Teams retrieved successfully');
     }
 
     /**
@@ -37,39 +43,20 @@ class Team extends BaseController
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => 'string|max:255',
         ]);
 
         if ($validator->fails()) {
             return $this->sendError($validator->errors(), 'Name is required');
         }
 
-        $team = new ModelsTeam();
-        $team->setTeamName($request->input('name'));
+        $team = $this->teamService->createTeam($request['name']);
 
-        if ($team->save()) {
-            return $this->sendResponse($team, 'Team was created');
+        if ($team === null) {
+            return $this->sendError(422, 'Team not created');
         }
 
-        return $this->sendError($team, 'Team was not created');
-    }
-
-    /**
-     * get Team object.
-     *
-     * @param int $id
-     *
-     * @return JsonResponse|object
-     */
-    private function getUserTeam(int $id): object
-    {
-        $team = ModelsTeam::all()->find($id);
-
-        if (empty($team)) {
-            return $this->sendError($team, 'Team not found');
-        }
-
-        return $team;
+        return $this->sendResponse(null, 'Team was created');
     }
 
     /**
@@ -81,28 +68,30 @@ class Team extends BaseController
      */
     public function addUserToTeam(int $teamId): JsonResponse
     {
-        $updateUserTeam = $this->getUserTeam($teamId);
-        $updateUserTeam->users()->attach(Auth::id());
+        $createMemberTeam = $this->teamService->addUserTeam($teamId);
 
-        return $this->sendResponse($updateUserTeam, 'User added to team');
+        if ($createMemberTeam['success'] === false) {
+            return $createMemberTeam['response'];
+        }
+
+        return $this->sendResponse(null, 'User added to team');
     }
 
     /**
      * Remove user from team.
      *
      * @param int $teamId
-     * @param int $userId
      *
      * @return JsonResponse
      */
-    public function removeUserFromTeam(int $teamId, int $userId): JsonResponse
+    public function removeUserFromTeam(int $teamId): JsonResponse
     {
-        $updateUserTeam = $this->getUserTeam($teamId);
+        $removeMemberTeam = $this->teamService->removeUserTeam($teamId);
 
-        if ($updateUserTeam->users()->detach($userId)) {
-            return $this->sendResponse($updateUserTeam, 'User removed from team');
+        if ($removeMemberTeam['success'] === false) {
+            return $removeMemberTeam['response'];
         }
 
-        return $this->sendError($updateUserTeam, 'User not removed from team');
+        return $this->sendResponse(null, 'User added to team');
     }
 }
