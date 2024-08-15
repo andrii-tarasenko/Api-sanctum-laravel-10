@@ -1,7 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace Domain\Task\Models;
 
+use Domain\Comment\Models\Comment;
+use Domain\Team\Models\Team;
+use Domain\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

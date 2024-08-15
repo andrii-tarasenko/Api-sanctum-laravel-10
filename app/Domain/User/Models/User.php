@@ -1,19 +1,24 @@
 <?php
 
-namespace App\Models;
+namespace Domain\User\Models;
 
+use Domain\Comment\Models\Comment;
+use Domain\Task\Models\Task;
+use Domain\Team\Models\Team;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Foundation\Auth\User as UserAuthorisation;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property string $name
  */
-class User extends Authenticatable
+class User extends UserAuthorisation
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens;
+    use HasFactory;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.

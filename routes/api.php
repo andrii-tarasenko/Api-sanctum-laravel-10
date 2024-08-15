@@ -1,10 +1,9 @@
 <?php
 
+use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\Comment;
 use App\Http\Controllers\API\Task;
 use App\Http\Controllers\API\Team;
-use App\Http\Controllers\API\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,13 +22,13 @@ use Illuminate\Support\Facades\Route;
 //});
 
 /*Registraton and authorisation */
-Route::controller(User::class)->group(function () {
+Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
     Route::post('login', 'login');
 });
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
-    Route::post('logout', [User::class, 'logout']);
+    Route::post('logout', [AuthController::class, 'logout']);
     Route::controller(Task::class)->group(function () {
         Route::get('tasks', 'index');
         Route::get('tasks/{id}', 'show');
