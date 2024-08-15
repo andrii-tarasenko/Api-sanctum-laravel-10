@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class TaskService
 {
-    protected $taskRepository;
+    protected TaskRepository $taskRepository;
 
     /**
      * @param TaskRepository $taskRepository
