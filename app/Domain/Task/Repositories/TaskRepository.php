@@ -27,12 +27,13 @@ class TaskRepository
         return Task::all();
     }
 
+
     /**
      * @param int $id
      *
-     * @return Collection|null
+     * @return Task|null
      */
-    public function getById(int $id): ?Collection
+    public function getById(int $id): ?Task
     {
         return Task::all()->find($id);
     }

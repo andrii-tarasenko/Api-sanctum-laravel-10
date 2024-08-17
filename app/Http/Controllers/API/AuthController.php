@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends BaseController
 {
-    private $userService;
+    private UserService $userService;
 
-    private $authService;
+    private AuthService $authService;
 
     /**
      * @param UserService $userService

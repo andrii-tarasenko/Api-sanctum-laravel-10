@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class Task extends BaseController
 {
-    private $taskService;
+    private TaskService $taskService;
 
     public function __construct(TaskService $taskService)
     {
@@ -30,7 +30,7 @@ class Task extends BaseController
             return $this->sendError(422, 'Comment is not found');
         }
 
-        return $this->sendResponse($allTasks, 'All tasks was send');
+        return $this->sendResponse($allTasks, 'All tasks was send.');
     }
 
     /**
