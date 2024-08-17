@@ -45,9 +45,9 @@ class TaskService
     /**
      * @param int $id
      *
-     * @return Collection|null
+     * @return Task|null
      */
-    public function getTaskById(int $id): ?Collection
+    public function getTaskById(int $id): ?Task
     {
         return $this->taskRepository->getById($id);
     }

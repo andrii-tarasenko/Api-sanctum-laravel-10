@@ -4,6 +4,7 @@ namespace Domain\User\Services;
 
 use Domain\User\Models\User;
 use Domain\User\Repositories\UserRepository;
+use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
@@ -21,7 +22,7 @@ class UserService
      */
     public function registration(array $inputData): ?User
     {
-        $inputData['password'] = bcrypt($inputData['password']);
+        $inputData['password'] = Hash::make($inputData['password']);
         $user = new User();
         $user->fill($inputData);
 
